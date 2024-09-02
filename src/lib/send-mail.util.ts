@@ -25,6 +25,7 @@ export default async function sendVerificationEmail(username:string,email:string
         return {
             success: false,
             message: "Failed to send verification email",
+            status:500
         }
     }
 
