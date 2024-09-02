@@ -7,19 +7,9 @@ import dbConnect from "@/lib/dbConnect";
 
 async function POST(req:Request) {
 
-    const{ username , email , password } = await req.json() 
-
-    // compelsory username,email,password
-
-    /**
-     * Username + verified => return user already exist
-     * 
-     * username + not verified => update with new credentials + send verifyCode
-     * 
-     * not username + not verified => add new credentials + send verifyCode
-     */
-
     await dbConnect()
+
+    const{ username , email , password } = await req.json() 
 
     try {
         const userAlreadyExist = await UserModel.findOne({
@@ -55,13 +45,16 @@ async function POST(req:Request) {
             userWithEmail.password = hashedPassword;
             userWithEmail.verifyCode = verifyCode;
             userWithEmail.verifyCodeExpiry = verifyCodeExpiry;
-    
+
+            await userWithEmail.save()
         }
         else{
             
-            const hashedPassword = 0;
-            const verifyCodeExpiry = 0;
-            const verifyCode = 0;
+            const hashedPassword = await bcrypt.hash(password,10);;
+            const verifyCode = String(Math.floor(Math.random()*1000000));
+
+            const verifyCodeExpiry = new Date();
+            verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
     
             const newUser = new UserModel({
                 username,
