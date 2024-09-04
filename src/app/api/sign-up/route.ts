@@ -5,7 +5,7 @@ import UserModel from "@/models/users.model";
 import { ApiResponse } from "@/types/ApiResponse";
 import dbConnect from "@/lib/dbConnect";
 
-async function POST(req:Request) {
+export async function POST(req:Request) {
 
     await dbConnect()
 
@@ -39,8 +39,7 @@ async function POST(req:Request) {
             verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
     
             const hashedPassword = await bcrypt.hash(password,10);
-            const verifyCode = String(Math.floor(Math.random()*1000000));
-    
+            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
     
             userWithEmail.password = hashedPassword;
             userWithEmail.verifyCode = verifyCode;
@@ -51,7 +50,7 @@ async function POST(req:Request) {
         else{
             
             const hashedPassword = await bcrypt.hash(password,10);;
-            const verifyCode = String(Math.floor(Math.random()*1000000));
+            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const verifyCodeExpiry = new Date();
             verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
@@ -73,19 +72,7 @@ async function POST(req:Request) {
     
         const res = await sendVerificationEmail(username,email);
     
-        if(!res.success){
-            return Response.json(
-                ApiResponse({
-                    success: res.success,
-                    message: res.message,
-                    data: res.data,
-                }),
-                {
-                    status: res.status
-                }
-            )
-        }
-    
+        // handle both scearios : failed & success  checkout:sendVerificationEmail
         return Response.json(
             ApiResponse({
                     success: res.success,

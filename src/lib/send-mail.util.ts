@@ -32,6 +32,7 @@ export default async function sendVerificationEmail(username:string,email:string
 
     return {
         success: true,
-        message: 'Verification email sent successfully'
+        message: 'Verification email sent successfully',
+        status:200
     }
 }
