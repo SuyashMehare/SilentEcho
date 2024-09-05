@@ -32,15 +32,14 @@ export async function POST(req:Request) {
         const userWithEmail = await UserModel.findOne({
             email
         })
-    
+        
+        const verifyCodeExpiry = new Date();
+        verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedPassword = await bcrypt.hash(password,10);
+
         if(userWithEmail){
-            
-            const verifyCodeExpiry = new Date();
-            verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
-    
-            const hashedPassword = await bcrypt.hash(password,10);
-            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
             userWithEmail.password = hashedPassword;
             userWithEmail.verifyCode = verifyCode;
             userWithEmail.verifyCodeExpiry = verifyCodeExpiry;
@@ -48,13 +47,7 @@ export async function POST(req:Request) {
             await userWithEmail.save()
         }
         else{
-            
-            const hashedPassword = await bcrypt.hash(password,10);;
-            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-            const verifyCodeExpiry = new Date();
-            verifyCodeExpiry.setHours(verifyCodeExpiry.getHours() + 1)
-    
+                
             const newUser = new UserModel({
                 username,
                 email,
@@ -70,7 +63,7 @@ export async function POST(req:Request) {
             await newUser.save();
         }
     
-        const res = await sendVerificationEmail(username,email);
+        const res = await sendVerificationEmail(username,email,verifyCode);
     
         // handle both scearios : failed & success  checkout:sendVerificationEmail
         return Response.json(
